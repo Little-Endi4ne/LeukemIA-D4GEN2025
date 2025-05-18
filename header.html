@@ -1,21 +1,9 @@
-<?php
-// Vérifier si la session est démarrée, sinon la démarrer
-if (session_status() == PHP_SESSION_NONE) {
-    session_start();
-}
-
-// Vérifier si l'utilisateur est connecté
-if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-    header("Location: login.php");
-    exit;
-}
-?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo isset($page_title) ? $page_title . ' - LeukemIA' : 'LeukemIA - Estimation de durée de vie pour patients leucémiques'; ?></title>
+    <title id="page-title">LeukemIA - Estimation de durée de vie pour patients leucémiques</title>
     <style>
         :root {
             --primary-color: #5A7D9A;
@@ -330,16 +318,16 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     <header>
         <div class="container header-container">
             <div class="logo-container">
-                <img src="logo.png" alt="LeukemIA Logo">
+                <img src="img/logo.png" alt="LeukemIA Logo">
             </div>
             
             <div class="user-profile">
                 <button class="user-profile-btn">
-                    Dr. <?php echo htmlspecialchars($_SESSION['username']); ?>
+                    Dr. <span id="username">Randrianaly</span>
                 </button>
                 <div class="user-dropdown">
-                    <a href="profil.php">Mon profil</a>
-                    <a href="logout.php">Déconnexion</a>
+                    <a href="profil.html">Mon profil</a>
+                    <a href="#" id="logout-link">Déconnexion</a>
                 </div>
             </div>
             
@@ -359,28 +347,28 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
             <button class="close-menu" id="closeMenu">&times;</button>
         </div>
         <div class="mobile-menu-content">
-            <a href="accueil.php">
+            <a href="index.html">
                 <svg class="menu-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="#5A7D9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     <path d="M9 22V12H15V22" stroke="#5A7D9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
                 Accueil
             </a>
-            <a href="nouveau-patient.php">
+            <a href="nouveau-patient.html">
                 <svg class="menu-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 5V19" stroke="#5A7D9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     <path d="M5 12H19" stroke="#5A7D9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
                 Nouveau patient
             </a>
-            <a href="patient-recent.php">
+            <a href="patient-recent.html">
                 <svg class="menu-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="#5A7D9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     <path d="M9 11C11.2091 11 13 9.20914 13 7C13 4.79086 11.2091 3 9 3C6.79086 3 5 4.79086 5 7C5 9.20914 6.79086 11 9 11Z" stroke="#5A7D9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
                 Patients récents
             </a>
-            <a href="statistiques.php">
+            <a href="statistiques.html">
                 <svg class="menu-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M18 20V10" stroke="#5A7D9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     <path d="M12 20V4" stroke="#5A7D9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -391,7 +379,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
             
             <div class="menu-divider"></div>
             
-            <a href="faire-estimation.php">
+            <a href="faire-estimation.html">
                 <svg class="menu-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M22 12H18L15 21L9 3L6 12H2" stroke="#5A7D9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
@@ -400,7 +388,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
             
             <div class="menu-divider"></div>
             
-            <a href="creation-compte.php">
+            <a href="creation-compte.html">
                 <svg class="menu-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M16 21V19C16 16.7909 14.2091 15 12 15H5C2.79086 15 1 16.7909 1 19V21" stroke="#5A7D9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     <path d="M8.5 11C10.7091 11 12.5 9.20914 12.5 7C12.5 4.79086 10.7091 3 8.5 3C6.29086 3 4.5 4.79086 4.5 7C4.5 9.20914 6.29086 11 8.5 11Z" stroke="#5A7D9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -411,30 +399,3 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
             </a>
         </div>
     </div>
-    
-    <script>
-        // Script pour le menu mobile
-        document.addEventListener('DOMContentLoaded', function() {
-            const menuToggle = document.getElementById('menuToggle');
-            const closeMenu = document.getElementById('closeMenu');
-            const mobileMenu = document.getElementById('mobileMenu');
-            const menuOverlay = document.getElementById('menuOverlay');
-            
-            // Ouvrir le menu
-            menuToggle.addEventListener('click', function() {
-                mobileMenu.classList.add('active');
-                menuOverlay.classList.add('active');
-                document.body.style.overflow = 'hidden'; // Empêcher le défilement
-            });
-            
-            // Fermer le menu
-            closeMenu.addEventListener('click', closeNav);
-            menuOverlay.addEventListener('click', closeNav);
-            
-            function closeNav() {
-                mobileMenu.classList.remove('active');
-                menuOverlay.classList.remove('active');
-                document.body.style.overflow = ''; // Restaurer le défilement
-            }
-        });
-    </script>

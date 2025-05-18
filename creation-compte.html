@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeukemIA - Création de compte</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Styles spécifiques à cette page */
+        .page-title {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 0.5rem;
+        }
+        
+        .breadcrumb {
+            display: flex;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .breadcrumb a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .breadcrumb span {
+            margin: 0 10px;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-success {
+            background-color: var(--positive-light);
+            color: #2a5042;
+            border-left: 4px solid var(--positive-color);
+        }
+        
+        .alert-danger {
+            background-color: var(--alert-light);
+            color: #9a4836;
+            border-left: 4px solid var(--alert-color);
+        }
+        
+        .form-info {
+            background-color: var(--primary-light);
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: var(--primary-color);
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -10px;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            flex: 1 0 200px;
+            padding: 0 10px;
+            margin-bottom: 20px;
+        }
+        
+        .required-field::after {
+            content: " *";
+            color: var(--alert-color);
+        }
+        
+        .password-strength {
+            margin-top: 5px;
+            font-size: 0.85rem;
+        }
+        
+        .strength-weak {
+            color: #d9534f;
+        }
+        
+        .strength-medium {
+            color: #f0ad4e;
+        }
+        
+        .strength-strong {
+            color: #5cb85c;
+        }
+        
+        .form-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn-secondary {
+            background-color: #f5f5f5;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e9e9e9;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .form-group {
+                flex: 1 0 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Le header sera inclus ici via JavaScript -->
+    <div id="header"></div>
+    
+    <div class="container">
+        <main>
+            <div class="breadcrumb">
+                <a href="index.html">Accueil</a>
+                <span>›</span>
+                <a href="admin.html">Administration</a>
+                <span>›</span>
+                <strong>Création de compte</strong>
+            </div>
+            
+            <h1 class="page-title">Création d'un nouveau compte utilisateur</h1>
+            
+            <!-- Les alertes seront affichées dynamiquement ici -->
+            <div id="alert-container"></div>
+            
+            <div class="card">
+                <h2 class="card-title">Informations du compte</h2>
+                
+                <div class="form-info">
+                    Veuillez remplir tous les champs obligatoires (*) pour créer un nouveau compte utilisateur.
+                </div>
+                
+                <form id="creation-compte-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nom" class="required-field">Nom</label>
+                            <input type="text" id="nom" name="nom" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="prenom" class="required-field">Prénom</label>
+                            <input type="text" id="prenom" name="prenom" class="form-control" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="username" class="required-field">Nom d'utilisateur</label>
+                            <input type="text" id="username" name="username" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email" class="required-field">Adresse e-mail</label>
+                            <input type="email" id="email" name="email" class="form-control" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="password" class="required-field">Mot de passe</label>
+                            <input type="password" id="password" name="password" class="form-control" required onkeyup="checkPasswordStrength()">
+                            <div id="password-strength" class="password-strength"></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="confirm_password" class="required-field">Confirmer le mot de passe</label>
+                            <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="role" class="required-field">Rôle</label>
+                            <select id="role" name="role" class="form-control" required>
+                                <option value="">Sélectionnez un rôle</option>
+                                <option value="medecin">Médecin</option>
+                                <option value="assistant">Assistant médical</option>
+                                <option value="administrateur">Administrateur</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="specialite">Spécialité</label>
+                            <select id="specialite" name="specialite" class="form-control">
+                                <option value="">Sélectionnez une spécialité</option>
+                                <option value="hematologie">Hématologie</option>
+                                <option value="oncologie">Oncologie</option>
+                                <option value="medecine_interne">Médecine interne</option>
+                                <option value="pediatrie">Pédiatrie</option>
+                                <option value="autre">Autre</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-buttons">
+                        <a href="admin.html" class="btn btn-secondary">Annuler</a>
+                        <button type="submit" class="btn btn-primary">Créer le compte</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Le footer sera inclus ici via JavaScript -->
+    <div id="footer"></div>
+    
+    <script src="js/main.js"></script>
+    <script>
+
+        
+        // Fonction pour vérifier la force du mot de passe
+        function checkPasswordStrength() {
+            const password = document.getElementById('password').value;
+            const strengthIndicator = document.getElementById('password-strength');
+            
+            // Réinitialiser le texte
+            strengthIndicator.textContent = '';
+            
+            // Si le champ est vide, ne rien afficher
+            if (password.length === 0) {
+                return;
+            }
+            
+            // Définir les critères
+            const hasLowerCase = /[a-z]/.test(password);
+            const hasUpperCase = /[A-Z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+            const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(password);
+            const hasMinLength = password.length >= 8;
+            
+            // Calculer le score
+            let score = 0;
+            if (hasLowerCase) score++;
+            if (hasUpperCase) score++;
+            if (hasNumber) score++;
+            if (hasSpecialChar) score++;
+            if (hasMinLength) score++;
+            
+            // Déterminer la force
+            let strength = '';
+            let strengthClass = '';
+            
+            if (score < 3) {
+                strength = 'Faible';
+                strengthClass = 'strength-weak';
+            } else if (score < 5) {
+                strength = 'Moyen';
+                strengthClass = 'strength-medium';
+            } else {
+                strength = 'Fort';
+                strengthClass = 'strength-strong';
+            }
+            
+            // Afficher le résultat
+            strengthIndicator.textContent = `Force du mot de passe: ${strength}`;
+            strengthIndicator.className = `password-strength ${strengthClass}`;
+        }
+        
+        // Gestion du formulaire
+        document.getElementById('creation-compte-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Récupérer les valeurs du formulaire
+            const nom = document.getElementById('nom').value;
+            const prenom = document.getElementById('prenom').value;
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            const role = document.getElementById('role').value;
+            const specialite = document.getElementById('specialite').value;
+            
+            // Validation
+            let errorMessage = '';
+            
+            if (!nom || !prenom || !username || !email || !password) {
+                errorMessage = "Tous les champs obligatoires doivent être remplis.";
+            } else if (password !== confirmPassword) {
+                errorMessage = "Les mots de passe ne correspondent pas.";
+            } else if (password.length < 8) {
+                errorMessage = "Le mot de passe doit contenir au moins 8 caractères.";
+            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                errorMessage = "L'adresse email n'est pas valide.";
+            }
+            
+            // Afficher l'erreur ou le succès
+            const alertContainer = document.getElementById('alert-container');
+            
+            if (errorMessage) {
+                // Afficher l'erreur
+                alertContainer.innerHTML = `
+                    <div class="alert alert-danger">
+                        ${errorMessage}
+                    </div>
+                `;
+            } else {
+                // Simuler l'enregistrement réussi
+                
+                // Dans une application réelle, vous utiliseriez une API ou un service
+                // comme Firebase pour stocker les données utilisateur
+                
+                // Pour la démo, on stocke dans localStorage
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+                
+                // Vérifier si l'utilisateur existe déjà
+                if (users.some(user => user.username === username)) {
+                    alertContainer.innerHTML = `
+                        <div class="alert alert-danger">
+                            Ce nom d'utilisateur est déjà utilisé.
+                        </div>
+                    `;
+                    return;
+                }
+                
+                if (users.some(user => user.email === email)) {
+                    alertContainer.innerHTML = `
+                        <div class="alert alert-danger">
+                            Cette adresse email est déjà utilisée.
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Ajouter l'utilisateur
+                users.push({
+                    nom, 
+                    prenom, 
+                    username, 
+                    email, 
+                    password, // En production, ne jamais stocker les mots de passe en clair
+                    role,
+                    specialite,
+                    dateCreation: new Date().toISOString()
+                });
+                
+                // Sauvegarder
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                // Afficher le succès
+                alertContainer.innerHTML = `
+                    <div class="alert alert-success">
+                        Le compte a été créé avec succès.
+                    </div>
+                `;
+                
+                // Réinitialiser le formulaire
+                document.getElementById('creation-compte-form').reset();
+            }
+            
+            // Faire défiler jusqu'à l'alerte
+            alertContainer.scrollIntoView({ behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>
