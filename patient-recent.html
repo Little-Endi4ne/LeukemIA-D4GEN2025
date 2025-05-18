@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeukemIA - Patients Récents</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Styles spécifiques à la page de patients récents */
+        .status-pill {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .status-en-traitement {
+            background-color: var(--primary-lighter);
+            color: var(--primary-color);
+        }
+        
+        .status-remission {
+            background-color: var(--positive-light);
+            color: #2a5042;
+        }
+        
+        .status-nouveau {
+            background-color: var(--alert-light);
+            color: #9a4836;
+        }
+        
+        .status-surveillance {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+        
+        .risk-high {
+            color: #d9534f;
+        }
+        
+        .risk-medium {
+            color: #f0ad4e;
+        }
+        
+        .risk-low {
+            color: #5cb85c;
+        }
+        
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: flex-end;
+        }
+        
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .filter-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+            font-size: 0.9rem;
+        }
+        
+        .filter-group select, .filter-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--primary-light);
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--primary-lighter);
+        }
+        
+        th {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        
+        tbody tr:hover {
+            background-color: var(--primary-lighter);
+        }
+        
+        .patient-row {
+            cursor: pointer;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 0.85rem;
+        }
+        
+        .btn-view {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-edit {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+        }
+        
+        .btn-delete {
+            background-color: var(--alert-light);
+            color: #9a4836;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 20px;
+        }
+        
+        .pagination a {
+            display: inline-block;
+            padding: 8px 12px;
+            border-radius: 4px;
+            background-color: white;
+            color: var(--primary-color);
+            text-decoration: none;
+            border: 1px solid var(--primary-light);
+        }
+        
+        .pagination a:hover, .pagination a.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-group {
+                width: 100%;
+            }
+            
+            table {
+                font-size: 0.85rem;
+            }
+            
+            th, td {
+                padding: 8px 10px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Le header sera inclus ici via JavaScript -->
+    <div id="header"></div>
+    
+    <div class="container">
+        <main>
+            <div class="breadcrumb">
+                <a href="index.html">Accueil</a>
+                <span>›</span>
+                <strong>Patients récents</strong>
+            </div>
+            
+            <h1 class="page-title">Patients récemment consultés</h1>
+            
+            <div class="card">
+                <form action="patients-recents.html" method="get">
+                    <div class="filters">
+                        <div class="filter-group">
+                            <label for="recherche">Recherche par nom</label>
+                            <input type="text" id="recherche" name="recherche" placeholder="Nom ou prénom du patient">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="type_leucemie">Type de leucémie</label>
+                            <select id="type_leucemie" name="type_leucemie">
+                                <option value="">Tous les types</option>
+                                <option value="LMA">LMA</option>
+                                <option value="LLA">LLA</option>
+                                <option value="LMC">LMC</option>
+                                <option value="LLC">LLC</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="statut">Statut</label>
+                            <select id="statut" name="statut">
+                                <option value="">Tous les statuts</option>
+                                <option value="En traitement">En traitement</option>
+                                <option value="En rémission">En rémission</option>
+                                <option value="Nouveau diagnostic">Nouveau diagnostic</option>
+                                <option value="Surveillance post-traitement">Surveillance post-traitement</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-buttons">
+                            <button type="submit" class="btn btn-primary">Filtrer</button>
+                            <a href="patients-recents.html" class="btn btn-secondary">Réinitialiser</a>
+                        </div>
+                    </div>
+                </form>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Patient</th>
+                                <th>Âge</th>
+                                <th>Type</th>
+                                <th>Date diagnostic</th>
+                                <th>Dernière visite</th>
+                                <th>Statut</th>
+                                <th>Estimation</th>
+                                <th>Risque</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="patient-row">
+                                <td>
+                                    <strong>Dupont</strong> Jean
+                                </td>
+                                <td>67 ans</td>
+                                <td>LMA</td>
+                                <td>15/02/2025</td>
+                                <td>10/05/2025</td>
+                                <td>
+                                    <span class="status-pill status-en-traitement">
+                                        En traitement
+                                    </span>
+                                </td>
+                                <td>24 mois</td>
+                                <td>
+                                    <span class="risk-medium">
+                                        Modéré
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="patient-details.html?id=1" class="btn btn-sm btn-view">Voir</a>
+                                        <a href="patient-edit.html?id=1" class="btn btn-sm btn-edit">Modifier</a>
+                                        <a href="#" class="btn btn-sm btn-delete" onclick="confirmDelete(1)">Supprimer</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="patient-row">
+                                <td>
+                                    <strong>Martin</strong> Sophie
+                                </td>
+                                <td>42 ans</td>
+                                <td>LLC</td>
+                                <td>22/03/2025</td>
+                                <td>12/05/2025</td>
+                                <td>
+                                    <span class="status-pill status-remission">
+                                        En rémission
+                                    </span>
+                                </td>
+                                <td>60+ mois</td>
+                                <td>
+                                    <span class="risk-low">
+                                        Faible
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="patient-details.html?id=2" class="btn btn-sm btn-view">Voir</a>
+                                        <a href="patient-edit.html?id=2" class="btn btn-sm btn-edit">Modifier</a>
+                                        <a href="#" class="btn btn-sm btn-delete" onclick="confirmDelete(2)">Supprimer</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="patient-row">
+                                <td>
+                                    <strong>Petit</strong> Robert
+                                </td>
+                                <td>75 ans</td>
+                                <td>LMA</td>
+                                <td>05/01/2025</td>
+                                <td>05/05/2025</td>
+                                <td>
+                                    <span class="status-pill status-en-traitement">
+                                        En traitement
+                                    </span>
+                                </td>
+                                <td>12 mois</td>
+                                <td>
+                                    <span class="risk-high">
+                                        Élevé
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="patient-details.html?id=3" class="btn btn-sm btn-view">Voir</a>
+                                        <a href="patient-edit.html?id=3" class="btn btn-sm btn-edit">Modifier</a>
+                                        <a href="#" class="btn btn-sm btn-delete" onclick="confirmDelete(3)">Supprimer</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="patient-row">
+                                <td>
+                                    <strong>Leroy</strong> Marie
+                                </td>
+                                <td>38 ans</td>
+                                <td>LLA</td>
+                                <td>18/04/2025</td>
+                                <td>02/05/2025</td>
+                                <td>
+                                    <span class="status-pill status-nouveau">
+                                        Nouveau diagnostic
+                                    </span>
+                                </td>
+                                <td>48 mois</td>
+                                <td>
+                                    <span class="risk-medium">
+                                        Modéré
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="patient-details.html?id=4" class="btn btn-sm btn-view">Voir</a>
+                                        <a href="patient-edit.html?id=4" class="btn btn-sm btn-edit">Modifier</a>
+                                        <a href="#" class="btn btn-sm btn-delete" onclick="confirmDelete(4)">Supprimer</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="patient-row">
+                                <td>
+                                    <strong>Moreau</strong> Philippe
+                                </td>
+                                <td>55 ans</td>
+                                <td>LMC</td>
+                                <td>10/11/2024</td>
+                                <td>15/05/2025</td>
+                                <td>
+                                    <span class="status-pill status-remission">
+                                        En rémission
+                                    </span>
+                                </td>
+                                <td>72+ mois</td>
+                                <td>
+                                    <span class="risk-low">
+                                        Faible
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="patient-details.html?id=5" class="btn btn-sm btn-view">Voir</a>
+                                        <a href="patient-edit.html?id=5" class="btn btn-sm btn-edit">Modifier</a>
+                                        <a href="#" class="btn btn-sm btn-delete" onclick="confirmDelete(5)">Supprimer</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="pagination">
+                        <a href="#" class="active">1</a>
+                        <a href="#">2</a>
+                        <a href="#">3</a>
+                        <a href="#">›</a>
+                    </div>
+                </div>
+                
+                <div style="text-align: right; margin-top: 20px;">
+                    <a href="nouveau-patient.html" class="btn btn-primary">Nouveau patient</a>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Le footer sera inclus ici via JavaScript -->
+    <div id="footer"></div>
+    
+    <script src="js/main.js"></script>
+    <script>
+        function confirmDelete(patientId) {
+            if (confirm("Êtes-vous sûr de vouloir supprimer ce patient ? Cette action est irréversible.")) {
+                // Dans une application réelle, vous redirigeriez vers une page de suppression
+                // ou vous feriez une requête AJAX pour supprimer le patient
+                alert("Suppression du patient #" + patientId + " (simulation)");
+            }
+        }
+    </script>
+</body>
+</html>
