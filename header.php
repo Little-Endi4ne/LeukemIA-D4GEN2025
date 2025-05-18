@@ -1,0 +1,440 @@
+<?php
+// Vérifier si la session est démarrée, sinon la démarrer
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Vérifier si l'utilisateur est connecté
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    header("Location: login.php");
+    exit;
+}
+?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo isset($page_title) ? $page_title . ' - LeukemIA' : 'LeukemIA - Estimation de durée de vie pour patients leucémiques'; ?></title>
+    <style>
+        :root {
+            --primary-color: #5A7D9A;
+            --primary-light: #B0C4D8;
+            --primary-lighter: #DDE6ED;
+            --positive-color: #A8CBB7;
+            --positive-light: #CFE6D3;
+            --alert-color: #E79C8B;
+            --alert-light: #F5C6A5;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--primary-lighter);
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }        
+        
+        .logo-container img {
+            width: 150px !important;
+            height: auto !important;
+        }
+        
+        .user-profile {
+            margin-left: auto;
+            margin-right: 20px;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .user-profile-btn {
+            display: flex;
+            align-items: center;
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .user-profile-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 150px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 4px;
+            overflow: hidden;
+            color: #333;
+        }
+        
+        .user-profile:hover .user-dropdown {
+            display: block;
+        }
+        
+        .user-dropdown a {
+            color: #333;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .user-dropdown a:hover {
+            background-color: var(--primary-lighter);
+        }
+        
+        /* Styles pour le menu hamburger */
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 10px 8px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .menu-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .menu-toggle span {
+            display: block;
+            height: 2px;
+            width: 100%;
+            background-color: white;
+            border-radius: 2px;
+        }
+        
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 250px;
+            height: 100%;
+            background-color: white;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+            overflow-y: auto;
+        }
+        
+        .mobile-menu.active {
+            transform: translateX(0);
+            display: block;
+        }
+        
+        .mobile-menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .close-menu {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .mobile-menu-content {
+            padding: 10px 0;
+        }
+        
+        .mobile-menu-content a {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: #333;
+            text-decoration: none;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.3s;
+        }
+        
+        .mobile-menu-content a:hover {
+            background-color: var(--primary-lighter);
+        }
+        
+        .menu-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+        }
+        
+        .menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+        
+        .menu-overlay.active {
+            display: block;
+        }
+        
+        .menu-divider {
+            height: 1px;
+            background-color: #eee;
+            margin: 10px 0;
+        }
+        
+        /* Styles généraux pour les pages */
+        main {
+            padding: 2rem 0;
+        }
+        
+        .page-title {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 0.5rem;
+        }
+        
+        .breadcrumb {
+            display: flex;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .breadcrumb a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .breadcrumb span {
+            margin: 0 10px;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #4a6b85;
+        }
+        
+        .btn-secondary {
+            background-color: #f5f5f5;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e9e9e9;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-success {
+            background-color: var(--positive-light);
+            color: #2a5042;
+            border-left: 4px solid var(--positive-color);
+        }
+        
+        .alert-danger {
+            background-color: var(--alert-light);
+            color: #9a4836;
+            border-left: 4px solid var(--alert-color);
+        }
+        
+        footer {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-container">
+            <div class="logo-container">
+                <img src="logo.png" alt="LeukemIA Logo">
+            </div>
+            
+            <div class="user-profile">
+                <button class="user-profile-btn">
+                    Dr. <?php echo htmlspecialchars($_SESSION['username']); ?>
+                </button>
+                <div class="user-dropdown">
+                    <a href="profil.php">Mon profil</a>
+                    <a href="logout.php">Déconnexion</a>
+                </div>
+            </div>
+            
+            <button class="menu-toggle" id="menuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+    
+    <!-- Menu mobile -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <h3>Menu</h3>
+            <button class="close-menu" id="closeMenu">&times;</button>
+        </div>
+        <div class="mobile-menu-content">
+            <a href="accueil.php">
+                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="#5A7D9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 22V12H15V22" stroke="#5A7D9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Accueil
+            </a>
+            <a href="nouveau-patient.php">
+                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 5V19" stroke="#5A7D9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M5 12H19" stroke="#5A7D9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Nouveau patient
+            </a>
+            <a href="patient-recent.php">
+                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="#5A7D9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 11C11.2091 11 13 9.20914 13 7C13 4.79086 11.2091 3 9 3C6.79086 3 5 4.79086 5 7C5 9.20914 6.79086 11 9 11Z" stroke="#5A7D9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Patients récents
+            </a>
+            <a href="statistiques.php">
+                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 20V10" stroke="#5A7D9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 20V4" stroke="#5A7D9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M6 20V14" stroke="#5A7D9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Statistiques
+            </a>
+            
+            <div class="menu-divider"></div>
+            
+            <a href="faire-estimation.php">
+                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 12H18L15 21L9 3L6 12H2" stroke="#5A7D9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Réaliser une estimation
+            </a>
+            
+            <div class="menu-divider"></div>
+            
+            <a href="creation-compte.php">
+                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M16 21V19C16 16.7909 14.2091 15 12 15H5C2.79086 15 1 16.7909 1 19V21" stroke="#5A7D9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8.5 11C10.7091 11 12.5 9.20914 12.5 7C12.5 4.79086 10.7091 3 8.5 3C6.29086 3 4.5 4.79086 4.5 7C4.5 9.20914 6.29086 11 8.5 11Z" stroke="#5A7D9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M20 8V14" stroke="#5A7D9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M23 11H17" stroke="#5A7D9A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Création de compte
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        // Script pour le menu mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menuToggle');
+            const closeMenu = document.getElementById('closeMenu');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const menuOverlay = document.getElementById('menuOverlay');
+            
+            // Ouvrir le menu
+            menuToggle.addEventListener('click', function() {
+                mobileMenu.classList.add('active');
+                menuOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Empêcher le défilement
+            });
+            
+            // Fermer le menu
+            closeMenu.addEventListener('click', closeNav);
+            menuOverlay.addEventListener('click', closeNav);
+            
+            function closeNav() {
+                mobileMenu.classList.remove('active');
+                menuOverlay.classList.remove('active');
+                document.body.style.overflow = ''; // Restaurer le défilement
+            }
+        });
+    </script>
